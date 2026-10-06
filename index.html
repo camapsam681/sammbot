@@ -7,83 +7,256 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0a0e14;color:#fff;display:flex;flex-direction:column}
-header{background:linear-gradient(135deg,#7c3aed,#2563eb);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(124,58,237,.4);z-index:10;flex-shrink:0}
-header .left{display:flex;align-items:center;gap:10px;min-width:0}
-header .logo{width:30px;height:30px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
-header h1{font-size:14px;font-weight:800}
-header .status{font-size:10px;color:#c4b5fd;display:flex;align-items:center;gap:4px;margin-top:2px}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(124,58,237,.25), transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(236,72,153,.2), transparent 50%),
+    #0a0e14;
+  color:#fff;display:flex;flex-direction:column;
+}
+
+/* ===== HEADER ===== */
+header{
+  background:rgba(20,26,36,.7);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,255,255,.06);
+  padding:12px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  z-index:10;flex-shrink:0;
+}
+header .left{display:flex;align-items:center;gap:12px;min-width:0}
+header .logo{
+  width:34px;height:34px;
+  background:linear-gradient(135deg,#ec4899,#7c3aed);
+  border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+  box-shadow:0 4px 16px rgba(124,58,237,.5);
+}
+header h1{font-size:14px;font-weight:800;letter-spacing:-.3px}
+header .status{font-size:10px;color:#a78bfa;display:flex;align-items:center;gap:5px;margin-top:2px}
 header .dot{width:6px;height:6px;background:#30d158;border-radius:50%;animation:blink 1.5s infinite}
-header .dot.off{background:#ff375f}
+header .dot.off{background:#ff375f;animation:none}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-header .icons{display:flex;gap:10px;font-size:17px;align-items:center}
-header .icons span{cursor:pointer;padding:4px 6px;border-radius:6px}
-.chat{flex:1;overflow-y:auto;padding:14px 12px 16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
-.msg{display:flex;gap:8px;max-width:100%;animation:fadeIn .3s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== TABS ===== */
+.tabs-bar{
+  display:flex;gap:6px;padding:10px 16px 0;
+  background:rgba(20,26,36,.5);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,255,255,.06);
+  flex-shrink:0;
+}
+.tab-btn{
+  flex:1;padding:10px 12px;border:none;
+  background:transparent;color:#6b7280;
+  font-size:12px;font-weight:700;font-family:inherit;
+  border-radius:12px 12px 0 0;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+  position:relative;
+}
+.tab-btn.active{color:#fff;background:rgba(124,58,237,.15)}
+.tab-btn.active::after{
+  content:'';position:absolute;bottom:0;left:20%;right:20%;height:2px;
+  background:linear-gradient(90deg,#ec4899,#7c3aed);border-radius:2px;
+}
+.tab-btn:active{transform:scale(.97)}
+
+/* ===== PANEL CONTAINER ===== */
+.panels{flex:1;overflow:hidden;position:relative}
+.panel{
+  position:absolute;inset:0;display:none;flex-direction:column;
+  animation:slideIn .3s cubic-bezier(.4,0,.2,1);
+}
+.panel.active{display:flex}
+@keyframes slideIn{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
+
+/* ===== CHAT ===== */
+.chat{flex:1;overflow-y:auto;padding:16px 14px 20px;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+.msg{display:flex;gap:10px;max-width:100%;animation:fadeIn .35s cubic-bezier(.4,0,.2,1)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .msg.user{flex-direction:row-reverse}
-.avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.3)}
 .msg.bot .avatar{background:linear-gradient(135deg,#ec4899,#7c3aed)}
 .msg.user .avatar{background:linear-gradient(135deg,#ff6b00,#ff2d55)}
-.bubble{background:#1c1c1e;border-radius:16px;padding:10px 14px;font-size:14px;line-height:1.55;max-width:calc(100% - 50px);word-wrap:break-word;white-space:pre-wrap}
-.msg.user .bubble{background:linear-gradient(135deg,#2563eb,#7c3aed);border-bottom-right-radius:4px}
-.msg.bot .bubble{background:#1c1c1e;border-bottom-left-radius:4px;border:1px solid #2c2c2e}
-.bubble code{background:#0a0e14;padding:2px 6px;border-radius:4px;color:#30d158;font-family:Menlo,monospace;font-size:12px}
+.bubble{
+  background:rgba(28,28,30,.85);
+  backdrop-filter:blur(10px);
+  border-radius:18px;padding:11px 15px;font-size:14px;line-height:1.6;
+  max-width:calc(100% - 52px);word-wrap:break-word;white-space:pre-wrap;
+  border:1px solid rgba(255,255,255,.06);
+}
+.msg.user .bubble{background:linear-gradient(135deg,#2563eb,#7c3aed);border-bottom-right-radius:6px;border:none}
+.msg.bot .bubble{background:rgba(28,28,30,.85);border-bottom-left-radius:6px}
+.bubble code{background:#0a0e14;padding:2px 6px;border-radius:5px;color:#30d158;font-family:Menlo,monospace;font-size:12px}
 .bubble b{color:#f472b6}
-.bubble .code-block{margin-top:8px;background:#0a0e14;border:1px solid #2c2c2e;border-radius:8px;overflow:hidden}
-.bubble .code-block .cb-head{background:#141a24;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#9ca3af;border-bottom:1px solid #2c2c2e;gap:6px}
-.bubble .code-block .cb-head button{background:#2c2c2e;color:#60a5fa;border:none;padding:4px 8px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer}
+.bubble .code-block{margin-top:8px;background:#0a0e14;border:1px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden}
+.bubble .code-block .cb-head{background:rgba(20,26,36,.9);padding:8px 12px;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#9ca3af;border-bottom:1px solid rgba(255,255,255,.06)}
+.bubble .code-block .cb-head button{background:rgba(255,255,255,.08);color:#60a5fa;border:none;padding:4px 8px;border-radius:5px;font-size:10px;font-weight:700;cursor:pointer}
 .bubble .code-block pre{padding:10px;font-family:Menlo,monospace;font-size:11px;color:#30d158;white-space:pre-wrap;word-break:break-all;line-height:1.5;max-height:300px;overflow-y:auto}
-.bubble img.chat-img{max-width:100%;border-radius:10px;margin-top:8px;display:block;border:1px solid #2c2c2e;cursor:pointer;background:#0a0e14;min-height:80px}
+.bubble img.chat-img{max-width:100%;border-radius:10px;margin-top:8px;display:block;border:1px solid rgba(255,255,255,.08);cursor:pointer;background:#0a0e14;min-height:80px}
 .typing{display:inline-block}
 .typing::after{content:'▋';color:#f472b6;animation:blink .8s infinite;margin-left:1px}
 .typing-dots span{display:inline-block;width:6px;height:6px;background:#6b7280;border-radius:50%;margin:0 2px;animation:bounce 1.4s infinite}
 .typing-dots span:nth-child(2){animation-delay:.2s}
 .typing-dots span:nth-child(3){animation-delay:.4s}
 @keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
-.recording{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#ec4899,#7c3aed);padding:8px 18px;border-radius:20px;font-size:12px;font-weight:700;z-index:100;display:none;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(236,72,153,.5)}
+
+/* ===== LOOKUP PANEL ===== */
+.lookup-wrap{flex:1;overflow-y:auto;padding:18px 16px 24px;display:flex;flex-direction:column;gap:16px}
+.lookup-card{
+  background:rgba(20,26,36,.7);
+  backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:18px;padding:18px;
+  box-shadow:0 8px 32px rgba(0,0,0,.3);
+}
+.lookup-card h3{font-size:15px;font-weight:800;margin-bottom:4px;color:#a78bfa;display:flex;align-items:center;gap:8px}
+.lookup-card p{font-size:11px;color:#6b7280;margin-bottom:14px;line-height:1.5}
+.field-row{display:flex;gap:8px;margin-bottom:10px}
+.field-row input,.field-row select{
+  flex:1;background:#0a0e14;border:1px solid rgba(255,255,255,.1);
+  color:#fff;padding:12px 14px;border-radius:12px;
+  font-size:13px;font-family:inherit;outline:none;
+  transition:border-color .2s;
+  min-width:0;
+}
+.field-row input:focus,.field-row select:focus{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.15)}
+.field-row input::placeholder{color:#4b5563}
+.field-row select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L2 4h8z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.btn-lookup{
+  width:100%;padding:13px;border:none;border-radius:12px;
+  background:linear-gradient(135deg,#ec4899,#7c3aed);
+  color:#fff;font-size:14px;font-weight:800;font-family:inherit;
+  cursor:pointer;transition:all .2s;
+  box-shadow:0 4px 16px rgba(124,58,237,.4);
+}
+.btn-lookup:active{transform:scale(.98);box-shadow:0 2px 8px rgba(124,58,237,.4)}
+.btn-lookup:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+/* ===== PROFILE CARD ===== */
+.profile-result{margin-top:14px;display:none;animation:fadeIn .4s ease}
+.profile-result.show{display:block}
+.profile-card{
+  background:rgba(28,28,30,.9);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:16px;padding:16px;
+  display:flex;gap:14px;align-items:center;
+}
+.profile-avatar{
+  width:64px;height:64px;border-radius:50%;flex-shrink:0;
+  border:2px solid rgba(124,58,237,.6);
+  background:#0a0e14;object-fit:cover;
+}
+.profile-info{flex:1;min-width:0}
+.profile-info h4{font-size:15px;font-weight:800;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.profile-meta{font-size:11px;color:#9ca3af;display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.profile-meta span{background:rgba(255,255,255,.06);padding:3px 8px;border-radius:6px}
+.status-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 10px;border-radius:8px;font-size:11px;font-weight:800;margin-top:8px;
+}
+.status-badge.active{background:rgba(48,209,88,.15);color:#30d158;border:1px solid rgba(48,209,88,.3)}
+.status-badge.banned{background:rgba(255,55,95,.15);color:#ff375f;border:1px solid rgba(255,55,95,.3)}
+.status-badge.loading{background:rgba(255,255,255,.06);color:#9ca3af}
+.skeleton{
+  background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.1) 50%,rgba(255,255,255,.05) 75%);
+  background-size:200% 100%;animation:shimmer 1.5s infinite;
+}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.error-box{
+  background:rgba(255,55,95,.1);border:1px solid rgba(255,55,95,.25);
+  border-radius:12px;padding:12px;margin-top:12px;font-size:12px;color:#ff9db0;line-height:1.5;
+}
+
+/* ===== RECORDING ===== */
+.recording{position:fixed;top:110px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#ec4899,#7c3aed);padding:9px 20px;border-radius:24px;font-size:12px;font-weight:800;z-index:100;display:none;align-items:center;gap:9px;box-shadow:0 8px 28px rgba(236,72,153,.5)}
 .recording.show{display:flex}
 .recording .pulse{width:10px;height:10px;background:#fff;border-radius:50%;animation:pulse-rec 1s infinite}
 @keyframes pulse-rec{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.3)}}
-.bottom-area{background:#141a24;border-top:1px solid #1f2937;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom)}
-.scroll-row{display:flex;gap:8px;overflow-x:auto;padding:8px 12px;scrollbar-width:none}
+
+/* ===== INPUT BAR ===== */
+.bottom-area{
+  background:rgba(20,26,36,.85);
+  backdrop-filter:blur(20px);
+  border-top:1px solid rgba(255,255,255,.06);
+  flex-shrink:0;padding-bottom:env(safe-area-inset-bottom);
+}
+.scroll-row{display:flex;gap:8px;overflow-x:auto;padding:10px 14px 4px;scrollbar-width:none}
 .scroll-row::-webkit-scrollbar{display:none}
-.suggestion{background:#1c1c1e;border:1px solid #2c2c2e;color:#9ca3af;padding:6px 12px;border-radius:16px;font-size:11px;white-space:nowrap;cursor:pointer;flex-shrink:0}
-.suggestion:active{background:#2c2c2e}
-.input-bar{padding:8px 12px 10px;display:flex;gap:6px;align-items:flex-end}
-.input-bar textarea{flex:1;background:#0a0e14;border:1px solid #2c2c2e;border-radius:20px;color:#fff;font-size:14px;font-family:inherit;padding:10px 14px;resize:none;outline:none;max-height:100px;line-height:1.4;min-height:40px}
-.input-bar textarea::placeholder{color:#6b7280}
-.btn-icon{width:40px;height:40px;border-radius:50%;border:none;background:#1c1c1e;color:#9ca3af;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
-.btn-icon:active{background:#2c2c2e}
-.btn-send{background:linear-gradient(135deg,#ec4899,#7c3aed);color:#fff}
-.btn-send:disabled{opacity:.4}
+.suggestion{
+  background:rgba(28,28,30,.8);border:1px solid rgba(255,255,255,.08);
+  color:#9ca3af;padding:7px 14px;border-radius:18px;font-size:11px;
+  white-space:nowrap;cursor:pointer;flex-shrink:0;transition:all .2s;
+}
+.suggestion:active{background:rgba(124,58,237,.2);transform:scale(.96)}
+.input-bar{padding:8px 14px 12px;display:flex;gap:7px;align-items:flex-end}
+.input-bar textarea{
+  flex:1;background:rgba(10,14,20,.9);border:1px solid rgba(255,255,255,.1);
+  border-radius:22px;color:#fff;font-size:14px;font-family:inherit;
+  padding:10px 16px;resize:none;outline:none;max-height:100px;
+  line-height:1.4;min-height:42px;transition:border-color .2s;
+}
+.input-bar textarea:focus{border-color:rgba(124,58,237,.5);box-shadow:0 0 0 3px rgba(124,58,237,.1)}
+.input-bar textarea::placeholder{color:#4b5563}
+.btn-icon{
+  width:42px;height:42px;border-radius:50%;border:none;
+  background:rgba(28,28,30,.9);color:#9ca3af;font-size:18px;
+  cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.btn-icon:active{transform:scale(.92)}
+.btn-send{background:linear-gradient(135deg,#ec4899,#7c3aed);color:#fff;box-shadow:0 4px 14px rgba(124,58,237,.4)}
+.btn-send:disabled{opacity:.4;box-shadow:none}
 .btn-mic.rec{background:linear-gradient(135deg,#ef4444,#ec4899);color:#fff;animation:pulse 1s infinite}
-.image-preview{position:fixed;bottom:110px;left:12px;right:12px;background:#1c1c1e;border:1px solid #2c2c2e;border-radius:12px;padding:10px;display:none;z-index:50;align-items:center;gap:10px}
-.image-preview.show{display:flex}
-.image-preview img{width:60px;height:60px;object-fit:cover;border-radius:8px}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.6)}50%{box-shadow:0 0 0 10px rgba(239,68,68,0)}}
+
+/* ===== IMAGE PREVIEW ===== */
+.image-preview{
+  position:fixed;bottom:130px;left:14px;right:14px;
+  background:rgba(28,28,30,.95);backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.1);border-radius:14px;
+  padding:10px;display:none;z-index:50;align-items:center;gap:10px;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
+}
+.image-preview.show{display:flex;animation:fadeIn .25s ease}
+.image-preview img{width:60px;height:60px;object-fit:cover;border-radius:10px}
 .image-preview .info{flex:1;font-size:11px;color:#9ca3af;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.image-preview .close{width:28px;height:28px;border-radius:50%;background:#2c2c2e;color:#fff;border:none;cursor:pointer;font-size:16px}
-.img-viewer{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:600;display:none;align-items:center;justify-content:center;padding:20px}
-.img-viewer.show{display:flex}
-.img-viewer img{max-width:100%;max-height:90vh;border-radius:12px}
-.img-viewer .close{position:absolute;top:20px;right:20px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;border:none;font-size:22px;cursor:pointer}
-.toast{position:fixed;bottom:180px;left:50%;transform:translateX(-50%);background:#2c2c2e;color:#fff;padding:10px 20px;border-radius:10px;font-size:12px;z-index:999;display:none;box-shadow:0 4px 20px rgba(0,0,0,.8);max-width:85%;text-align:center}
-.toast.show{display:block}
+.image-preview .close{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.1);color:#fff;border:none;cursor:pointer;font-size:16px}
+
+/* ===== IMG VIEWER ===== */
+.img-viewer{position:fixed;inset:0;background:rgba(0,0,0,.96);backdrop-filter:blur(20px);z-index:600;display:none;align-items:center;justify-content:center;padding:20px}
+.img-viewer.show{display:flex;animation:fadeIn .2s ease}
+.img-viewer img{max-width:100%;max-height:90vh;border-radius:14px}
+.img-viewer .close{position:absolute;top:20px;right:20px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.12);color:#fff;border:none;font-size:22px;cursor:pointer}
+
+/* ===== TOAST ===== */
+.toast{position:fixed;bottom:200px;left:50%;transform:translateX(-50%);background:rgba(44,44,46,.95);backdrop-filter:blur(20px);color:#fff;padding:11px 22px;border-radius:12px;font-size:12px;z-index:999;display:none;box-shadow:0 8px 28px rgba(0,0,0,.6);max-width:85%;text-align:center;font-weight:600}
+.toast.show{display:block;animation:fadeIn .25s ease}
 .toast.success{background:linear-gradient(135deg,#30d158,#0a84ff)}
 .toast.error{background:linear-gradient(135deg,#ff375f,#ff2d55)}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px}
-.modal.show{display:flex}
-.modal-box{background:#141a24;border:1px solid #2c2c2e;border-radius:16px;padding:24px;max-width:380px;width:100%}
-.modal-box h2{font-size:18px;font-weight:800;margin-bottom:8px;color:#a78bfa}
+
+/* ===== MODAL ===== */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(12px);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px}
+.modal.show{display:flex;animation:fadeIn .25s ease}
+.modal-box{
+  background:rgba(20,26,36,.95);backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.1);border-radius:20px;
+  padding:26px;max-width:400px;width:100%;
+  box-shadow:0 20px 60px rgba(0,0,0,.6);
+}
+.modal-box h2{font-size:19px;font-weight:800;margin-bottom:8px;color:#a78bfa;display:flex;align-items:center;gap:8px}
 .modal-box p{font-size:12px;color:#9ca3af;line-height:1.6;margin-bottom:16px}
-.modal-box input{width:100%;background:#0a0e14;border:1px solid #2c2c2e;color:#fff;padding:12px 14px;border-radius:10px;font-size:13px;font-family:Menlo,monospace;outline:none;margin-bottom:12px}
-.modal-box input:focus{border-color:#7c3aed}
+.modal-box input{width:100%;background:rgba(10,14,20,.9);border:1px solid rgba(255,255,255,.1);color:#fff;padding:13px 15px;border-radius:12px;font-size:13px;font-family:Menlo,monospace;outline:none;margin-bottom:12px;transition:border-color .2s}
+.modal-box input:focus{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.15)}
 .modal-box .btn-row{display:flex;gap:8px}
-.modal-box button{flex:1;padding:12px;border-radius:10px;border:none;font-size:14px;font-weight:700;cursor:pointer}
-.modal-box .btn-primary{background:linear-gradient(135deg,#ec4899,#7c3aed);color:#fff}
-.modal-box .btn-secondary{background:#2c2c2e;color:#9ca3af}
-.modal-box .btn-primary:disabled{opacity:.4}
-.modal-box .link{color:#60a5fa;text-decoration:none;font-size:11px;display:block;text-align:center;margin-top:12px}
+.modal-box button{flex:1;padding:13px;border-radius:12px;border:none;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;transition:all .2s}
+.modal-box button:active{transform:scale(.97)}
+.modal-box .btn-primary{background:linear-gradient(135deg,#ec4899,#7c3aed);color:#fff;box-shadow:0 4px 16px rgba(124,58,237,.4)}
+.modal-box .btn-secondary{background:rgba(255,255,255,.08);color:#9ca3af}
+.modal-box .btn-primary:disabled{opacity:.4;box-shadow:none}
+.modal-box .link{color:#60a5fa;text-decoration:none;font-size:11px;display:block;text-align:center;margin-top:14px}
+
 ::-webkit-scrollbar{width:0}
 </style>
 </head>
@@ -98,12 +271,59 @@ header .icons span{cursor:pointer;padding:4px 6px;border-radius:6px}
     </div>
   </div>
   <div class="icons">
-    <span id="btnClear" title="Xóa chat">🗑️</span>
-    <span id="btnKey" title="Đổi key">🔑</span>
+    <span id="btnClear" title="Xóa chat" style="cursor:pointer;padding:6px;font-size:17px">🗑️</span>
+    <span id="btnKey" title="Đổi key" style="cursor:pointer;padding:6px;font-size:17px">🔑</span>
   </div>
 </header>
 
-<div class="chat" id="chat"></div>
+<div class="tabs-bar">
+  <button class="tab-btn active" data-tab="chat">💬 Chat AI</button>
+  <button class="tab-btn" data-tab="lookup">🔍 Tra cứu</button>
+</div>
+
+<div class="panels">
+  <!-- CHAT PANEL -->
+  <div class="panel active" id="panel-chat">
+    <div class="chat" id="chat"></div>
+  </div>
+
+  <!-- LOOKUP PANEL -->
+  <div class="panel" id="panel-lookup">
+    <div class="lookup-wrap">
+      <!-- Free Fire -->
+      <div class="lookup-card">
+        <h3>🎮 Kiểm tra Free Fire</h3>
+        <p>Nhập UID và chọn region để xem profile + trạng thái ban.</p>
+        <div class="field-row">
+          <input type="text" id="ffUid" placeholder="Nhập UID Free Fire..." inputmode="numeric">
+          <select id="ffRegion">
+            <option value="vn">🇻🇳 VN</option>
+            <option value="sg">🇸🇬 SG</option>
+            <option value="ind">🇮🇳 IND</option>
+            <option value="id">🇮🇩 ID</option>
+            <option value="th">🇹🇭 TH</option>
+            <option value="br">🇧🇷 BR</option>
+            <option value="pk">🇵🇰 PK</option>
+            <option value="me">🌍 ME</option>
+          </select>
+        </div>
+        <button class="btn-lookup" id="btnFFLookup">🔍 Tra cứu Free Fire</button>
+        <div class="profile-result" id="ffResult"></div>
+      </div>
+
+      <!-- TikTok -->
+      <div class="lookup-card">
+        <h3>📱 Kiểm tra TikTok</h3>
+        <p>Nhập TikTok ID (username) để xem thông tin hồ sơ công khai.</p>
+        <div class="field-row">
+          <input type="text" id="tiktokId" placeholder="Nhập TikTok ID (không có @)...">
+        </div>
+        <button class="btn-lookup" id="btnTikTokLookup">🔍 Tra cứu TikTok</button>
+        <div class="profile-result" id="tiktokResult"></div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="recording" id="recording">
   <span class="pulse"></span>
@@ -116,7 +336,7 @@ header .icons span{cursor:pointer;padding:4px 6px;border-radius:6px}
   <button class="close" id="previewClose">✕</button>
 </div>
 
-<div class="bottom-area">
+<div class="bottom-area" id="bottomArea">
   <div class="scroll-row" id="suggestions">
     <div class="suggestion" data-p="Chào bạn, bạn là ai?">👋 Chào hỏi</div>
     <div class="suggestion" data-p="Giải thích định lý Pytago dễ hiểu">📐 Toán học</div>
@@ -163,7 +383,22 @@ header .icons span{cursor:pointer;padding:4px 6px;border-radius:6px}
 </audio>
 
 <script>
-console.log('[SAMM BOT] Bắt đầu load...');
+console.log('[SAMM BOT] Loaded');
+
+/* ============================================================
+   ⚠️ CẤU HÌNH PROXY - BẠN PHẢI ĐIỀN VÀO ĐÂY
+   ============================================================
+   Đây là URL proxy của BẠN (Cloudflare Worker, Vercel, ...).
+   Proxy sẽ nhận request và gọi API thật với key giấu ở server.
+   
+   Ví dụ proxy URL:
+   https://your-worker.workers.dev
+   
+   Proxy cần hỗ trợ 2 endpoint:
+   GET {PROXY_URL}/ff?uid=...&region=...
+   GET {PROXY_URL}/tiktok?id=...
+   ============================================================ */
+const PROXY_URL = ''; // <-- ĐIỀN URL PROXY CỦA BẠN VÀO ĐÂY
 
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
@@ -178,6 +413,7 @@ const statusText = document.getElementById('statusText');
 const keyModal = document.getElementById('keyModal');
 const keyInput = document.getElementById('keyInput');
 const btnKeySave = document.getElementById('btnKeySave');
+const bottomArea = document.getElementById('bottomArea');
 
 let messages = [];
 let isTyping = false;
@@ -185,6 +421,7 @@ let pendingImage = null;
 let femaleVoice = null;
 let userInteracted = false;
 
+/* ===== VOICE ===== */
 function refreshVoices(){
   try{
     const voices = speechSynthesis.getVoices() || [];
@@ -204,154 +441,101 @@ if('speechSynthesis' in window){
   setTimeout(refreshVoices, 1000);
   setTimeout(refreshVoices, 3000);
 }
-
 function speak(text){
-  if(!('speechSynthesis' in window)) return;
-  if(!text) return;
-  if(!userInteracted) return;
-  let t = String(text)
-    .replace(/```[\s\S]*?```/g, ' khối code ')
-    .replace(/[*`#_~>\[\]()]/g, '')
-    .replace(/\n+/g, '. ')
-    .trim();
+  if(!('speechSynthesis' in window) || !text || !userInteracted) return;
+  let t = String(text).replace(/```[\s\S]*?```/g,' khối code ').replace(/[*`#_~>\[\]()]/g,'').replace(/\n+/g,'. ').trim();
   if(!t) return;
-  if(t.length > 300) t = t.slice(0, 300) + '...';
+  if(t.length > 300) t = t.slice(0,300) + '...';
   try{
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(t);
     if(femaleVoice){ u.voice = femaleVoice; u.lang = femaleVoice.lang; }
     else u.lang = 'vi-VN';
-    u.pitch = 1.5;
-    u.rate = 1.05;
-    u.volume = 1;
+    u.pitch = 1.5; u.rate = 1.05; u.volume = 1;
     speechSynthesis.speak(u);
   }catch(e){}
 }
-
-function playMusic(){
-  music.volume = 0.2;
-  const p = music.play();
-  if(p && p.catch) p.catch(()=>{});
-}
-
+function playMusic(){ music.volume = 0.15; const p = music.play(); if(p&&p.catch) p.catch(()=>{}); }
 function markInteracted(){
   if(userInteracted) return;
   userInteracted = true;
   playMusic();
-  try{
-    const u = new SpeechSynthesisUtterance(' ');
-    u.volume = 0.01;
-    if(femaleVoice) u.voice = femaleVoice;
-    speechSynthesis.speak(u);
-  }catch(e){}
+  try{ const u = new SpeechSynthesisUtterance(' '); u.volume = 0.01; if(femaleVoice) u.voice = femaleVoice; speechSynthesis.speak(u); }catch(e){}
 }
-['click','touchstart','keydown'].forEach(function(evt){
-  document.addEventListener(evt, markInteracted, { once: true, passive: true });
-});
+['click','touchstart','keydown'].forEach(e => document.addEventListener(e, markInteracted, { once:true, passive:true }));
 
+/* ===== UTILS ===== */
 function escapeHtml(s){
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 function showToast(msg, type){
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.className = 'toast show' + (type ? ' ' + type : '');
   clearTimeout(t._t);
-  t._t = setTimeout(function(){ t.className = 'toast'; }, 2600);
+  t._t = setTimeout(()=>{ t.className = 'toast'; }, 2600);
 }
 function setStatus(text, ok){
   statusText.textContent = text;
   statusDot.className = 'dot' + (ok ? '' : ' off');
 }
-function scrollBottom(){
-  requestAnimationFrame(function(){ chat.scrollTop = chat.scrollHeight; });
-}
+function scrollBottom(){ requestAnimationFrame(()=>{ chat.scrollTop = chat.scrollHeight; }); }
 
 function renderMarkdown(text){
   let html = escapeHtml(text);
-  html = html.replace(/```(\w*)\n?([\s\S]*?)```/g, function(m, lang, code){
-    return '<div class="code-block"><div class="cb-head"><span>' + (lang || 'code') + '</span><button onclick="copyCodeBlock(this)">📋 Copy</button></div><pre>' + code.trim() + '</pre></div>';
-  });
+  html = html.replace(/```(\w*)\n?([\s\S]*?)```/g, (m, lang, code) =>
+    '<div class="code-block"><div class="cb-head"><span>'+(lang||'code')+'</span><button onclick="copyCodeBlock(this)">📋 Copy</button></div><pre>'+code.trim()+'</pre></div>');
   html = html.replace(/`([^`\n]+)`/g, '<code>$1</code>');
   html = html.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
   return html;
 }
-
 window.copyCodeBlock = function(btn){
   const pre = btn.closest('.code-block').querySelector('pre');
   if(!pre) return;
   const text = pre.textContent;
   if(navigator.clipboard){
-    navigator.clipboard.writeText(text).then(function(){ showToast('✅ Đã copy', 'success'); }).catch(function(){});
+    navigator.cl =ipboard.writeText(text).then(()=>showToast('✅ Đã copy','success')).catch(()=>{});
   } else {
-    const ta = document.createElement('textarea');
-    ta.value = text; document.body.appendChild(ta); ta.select();
-    document.execCommand('copy'); document.body.removeChild(ta);
-    showToast('✅ Đã copy', 'success');
+    const ta = document.createElement('textarea===='); ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta); showToast(' */
+✅ Đã copy','success');
   }
 };
 
+/* ===== CHAT RENDER ===== */
 function renderMessage(msg){
-  const wrap = document.createElement('div');
-  wrap.className = 'msg ' + msg.role;
+  constasync wrap = document.createElement('div');
+  wrap.className = 'msg ' + msg.role function;
   const av = document.createElement('div');
-  av.className = 'avatar';
-  av.textContent = msg.role === 'user' ? '👤' : '⚡';
+  av.className = 'avatar'; av.textContent = msg.role === 'user' ? '👤' : ' call⚡';
   wrap.appendChild(av);
   const bubble = document.createElement('div');
-  bubble.className = 'bubble';
-  bubble.innerHTML = renderMarkdown(msg.content || '');
+  bubble.className = 'bubble'; bubble.innerHTML = renderMarkdown(msg.content || '');
   if(msg.imageData){
-    const img = document.createElement('img');
-    img.className = 'chat-img';
-    img.src = msg.imageData;
-    img.onclick = function(){
-      document.getElementById('imgViewerImg').src = msg.imageData;
-      document.getElementById('imgViewer').classList.add('show');
-    };
+    const img = document.createElement('img'); img.className = 'chat-img'; img.src = msg.imageData;
+    img.onclick = () => { document.getElementById('imgViewerImg').src = msg.imageData; document.getElementById('imgViewer').classList.add('show'); };
     bubble.appendChild(img);
   }
-  wrap.appendChild(bubble);
-  chat.appendChild(wrap);
-  scrollBottom();
+  wrap.appendChild(bubble); chat.appendChild(wrap); scrollBottom();
   return bubble;
 }
-
 function botTypingIndicator(){
-  const wrap = document.createElement('div');
-  wrap.className = 'msg bot';
-  wrap.id = 'typingIndicator';
+  const wrap = document.createElement('div'); wrap.className = 'msg bot'; wrap.id = 'typingIndicator';
   wrap.innerHTML = '<div class="avatar">⚡</div><div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
-  chat.appendChild(wrap);
-  scrollBottom();
+  chat.appendChild(wrap); scrollBottom();
 }
-function removeTypingIndicator(){
-  const el = document.getElementById('typingIndicator');
-  if(el) el.remove();
-}
+function removeTypingIndicator(){ const el = document.getElementById('typingIndicator'); if(el) el.remove(); }
 
+/* ===== BUG FIX #1: Vòng lặp vô tận trong typewriter ===== */
 function botReplyStreaming(text){
-  return new Promise(function(resolve){
-    const wrap = document.createElement('div');
-    wrap.className = 'msg bot';
-    const av = document.createElement('div');
-    av.className = 'avatar'; av.textContent = '⚡';
+  return new Promise((resolve) => {
+    const wrap = document.createElement('div'); wrap.className = 'msg bot';
+    const av = document.createElement('div'); av.className = 'avatar'; av.textContent = '⚡';
     wrap.appendChild(av);
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
-    wrap.appendChild(bubble);
-    chat.appendChild(wrap);
-
+    const bubble = document.createElement('div'); bubble.className = 'bubble';
+    wrap.appendChild(bubble); chat.appendChild(wrap);
     const fullHTML = renderMarkdown(text);
-
-    if(/```/.test(text)){
-      bubble.innerHTML = fullHTML;
-      scrollBottom();
-      speak(text);
-      resolve();
-      return;
-    }
+    if(/```/.test(text)){ bubble.innerHTML = fullHTML; scrollBottom(); speak(text); resolve(); return; }
 
     let i = 0;
     const step = 3;
@@ -359,176 +543,72 @@ function botReplyStreaming(text){
     function type(){
       if(i >= len){
         bubble.innerHTML = fullHTML;
-        scrollBottom();
-        speak(text);
-        resolve();
-        return;
+        scrollBottom(); speak(text); resolve(); return;
       }
-      let next = i + step;
+      let next = Math.min(i + step, len);
       const slice = fullHTML.slice(0, next);
       const lastOpen = slice.lastIndexOf('<');
       const lastClose = slice.lastIndexOf('>');
-      if(lastOpen > lastClose) next = lastOpen;
+      if(lastOpen > lastClose){
+        const tagEnd = fullHTML.indexOf('>', lastOpen);
+        next = (tagEnd === -1) ? len : tagEnd + 1;
+        if(next <= i) next = Math.min(i + step, len);
+      }
       bubble.innerHTML = fullHTML.slice(0, next) + '<span class="typing"></span>';
-      i = next;
-      scrollBottom();
+      i = next; scrollBottom();
       setTimeout(type, 12);
     }
     type();
   });
 }
 
-async function callGroq(userText, imageData){
+/* ===== BUG FIX #2: Không gửi trùng tin nhắn userGroq(userText, imageData){
   if(!GROQ_KEY) throw new Error('Chưa có API key. Nhấn 🔑 để nhập.');
-
   const sysPrompt = 'Bạn là SAMM AI BOT - trợ lý AI thông minh, thân thiện. Trả lời bằng tiếng Việt. Có thể trả lời mọi câu hỏi: toán, lý, hóa, văn, sử, địa, code, dịch, sáng tạo, lời khuyên. Trả lời ngắn gọn dễ hiểu, có thể dùng emoji và markdown.';
-
-  const apiMessages = [{ role: 'system', content: sysPrompt }];
-  const recent = messages.slice(-10);
-  for(let k = 0; k < recent.length; k++){
-    const m = recent[k];
-    if(m.role === 'user') apiMessages.push({ role: 'user', content: m.content || '[ảnh]' });
-    else if(m.role === 'assistant') apiMessages.push({ role: 'assistant', content: m.content || '' });
+  const apiMessages = [{ role:'system', content:sysPrompt }];
+  const recent = messages.slice(-11, -1); // bỏ tin user hiện tại
+  for(const m of recent){
+    if(m.role === 'user' || m.role === 'assistant'){
+      apiMessages.push({ role:m.role, content:m.content || '' });
+    }
   }
-
   let userContent = userText || '';
   if(imageData) userContent = (userContent ? userContent + '\n\n' : '') + '[Người dùng đã gửi 1 ảnh]';
-  apiMessages.push({ role: 'user', content: userContent });
+  apiMessages.push({ role:'user', content:userContent });
 
   const res = await fetch(GROQ_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + GROQ_KEY
-    },
-    body: JSON.stringify({
-      model: GROQ_MODEL,
-      messages: apiMessages,
-      temperature: 0.8,
-      max_tokens: 2048
-    })
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + GROQ_KEY },
+    body: JSON.stringify({ model:GROQ_MODEL, messages:apiMessages, temperature:0.8, max_tokens:2048 })
   });
-
   if(!res.ok){
-    let errText = '';
-    try { errText = await res.text(); } catch(e){}
     if(res.status === 401) throw new Error('API key sai. Nhấn 🔑 nhập lại.');
     if(res.status === 429) throw new Error('Quá nhiều request. Đợi ~30s.');
     if(res.status === 400) throw new Error('Request lỗi. Key có thể sai định dạng.');
-    if(res.status === 403) throw new Error('Key bị chặn.');
-    if(res.status >= 500) throw new Error('Server lỗi. Thử lại sau.');
-    throw new Error('Lỗi ' + res.status + ': ' + errText.slice(0, 150));
+    throw new Error('Lỗi ' + res.status);
   }
-
   const data = await res.json();
-  const reply = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+  const reply = data.choices?.[0]?.message?.content;
   if(!reply) throw new Error('Groq không trả lời. Thử lại.');
   return reply.trim();
-}
-
-function imageToCanvas(dataUrl){
-  return new Promise(function(resolve, reject){
-    const img = new Image();
-    img.onload = function(){
-      const c = document.createElement('canvas');
-      c.width = img.width; c.height = img.height;
-      const ctx = c.getContext('2d');
-      ctx.drawImage(img, 0, 0);
-      resolve({ canvas: c, ctx: ctx, img: img });
-    };
-    img.onerror = reject;
-    img.src = dataUrl;
-  });
-}
-async function editImage(dataUrl, filter){
-  const r = await imageToCanvas(dataUrl);
-  const canvas = r.canvas, ctx = r.ctx, img = r.img;
-  const w = canvas.width, h = canvas.height;
-  if(filter === 'gray'){ ctx.filter='grayscale(1)'; ctx.drawImage(img,0,0); }
-  else if(filter === 'blur'){ ctx.filter='blur(4px)'; ctx.drawImage(img,0,0); }
-  else if(filter === 'bright'){ ctx.filter='brightness(1.4) saturate(1.2)'; ctx.drawImage(img,0,0); }
-  else if(filter === 'dark'){ ctx.filter='brightness(0.6)'; ctx.drawImage(img,0,0); }
-  else if(filter === 'sepia'){ ctx.filter='sepia(1)'; ctx.drawImage(img,0,0); }
-  else if(filter === 'invert'){ ctx.filter='invert(1)'; ctx.drawImage(img,0,0); }
-  else if(filter === 'warm'){ ctx.filter='sepia(0.3) saturate(1.3) hue-rotate(-15deg)'; ctx.drawImage(img,0,0); }
-  else if(filter === 'cold'){ ctx.filter='saturate(1.1) hue-rotate(180deg)'; ctx.drawImage(img,0,0); }
-  else if(filter === 'cute'){
-    ctx.filter='brightness(1.15) saturate(1.3)'; ctx.drawImage(img,0,0);
-    ctx.filter='none';
-    ctx.fillStyle='rgba(255,182,220,0.15)'; ctx.fillRect(0,0,w,h);
-  }
-  else if(filter === 'flip'){
-    ctx.save(); ctx.scale(-1,1); ctx.drawImage(img,-w,0); ctx.restore();
-  }
-  else if(filter === 'rotate'){
-    canvas.width=h; canvas.height=w;
-    ctx.translate(h/2,w/2); ctx.rotate(Math.PI/2);
-    ctx.drawImage(img,-w/2,-h/2);
-  }
-  else { ctx.drawImage(img,0,0); }
-  return canvas.toDataURL('image/png');
 }
 
 async function handleUserMessage(text, imageData){
   renderMessage({ role:'user', content:text, imageData:imageData });
   messages.push({ role:'user', content:text, imageData: !!imageData });
-
   setStatus('Đang trả lời...', true);
   botTypingIndicator();
-
   try{
-    if(imageData){
-      const t = (text || '').toLowerCase();
-      const edits = [
-        { re:/đen trắng|xám|gray|b&w/, f:'gray', msg:'Đã chuyển ảnh sang **đen trắng**.' },
-        { re:/mờ|blur/, f:'blur', msg:'Đã làm **mờ** ảnh.' },
-        { re:/sáng|bright/, f:'bright', msg:'Đã làm **sáng** ảnh.' },
-        { re:/tối|dark/, f:'dark', msg:'Đã làm **tối** ảnh.' },
-        { re:/nâu|sepia|hoài cổ/, f:'sepia', msg:'Hiệu ứng **hoài cổ**.' },
-        { re:/âm bản|invert|đảo màu/, f:'invert', msg:'Đã tạo **âm bản**.' },
-        { re:/ấm|warm/, f:'warm', msg:'Tông **ấm**.' },
-        { re:/lạnh|cold/, f:'cold', msg:'Tông **lạnh**.' },
-        { re:/cute|dễ thương|xinh/, f:'cute', msg:'Đã làm ảnh **cute** hơn 💕' },
-        { re:/lật|flip|gương/, f:'flip', msg:'Đã **lật ngang** ảnh.' },
-        { re:/xoay|rotate|quay/, f:'rotate', msg:'Đã **xoay 90°**.' }
-      ];
-      for(let k = 0; k < edits.length; k++){
-        if(edits[k].re.test(t)){
-          removeTypingIndicator();
-          const out = await editImage(imageData, edits[k].f);
-          messages.push({ role:'assistant', content:'✅ ' + edits[k].msg });
-          const wrap = document.createElement('div');
-          wrap.className = 'msg bot';
-          wrap.innerHTML = '<div class="avatar">⚡</div><div class="bubble">' + renderMarkdown('✅ ' + edits[k].msg) + '</div>';
-          chat.appendChild(wrap);
-          const img = document.createElement('img');
-          img.className = 'chat-img';
-          img.src = out;
-          img.onclick = function(){
-            document.getElementById('imgViewerImg').src = out;
-            document.getElementById('imgViewer').classList.add('show');
-          };
-          wrap.querySelector('.bubble').appendChild(img);
-          scrollBottom();
-          speak(edits[k].msg);
-          setStatus('Sẵn sàng', true);
-          return;
-        }
-      }
-    }
-
     const reply = await callGroq(text, imageData);
     removeTypingIndicator();
     messages.push({ role:'assistant', content:reply });
     await botReplyStreaming(reply);
     setStatus('Sẵn sàng', true);
-
   }catch(err){
     removeTypingIndicator();
-    console.error('[SAMM BOT] Lỗi:', err);
+    console.error('[SAMM BOT]', err);
     setStatus('Lỗi', false);
-    const errMsg = err.message || 'Lỗi không xác định';
-    await botReplyStreaming('⚠️ **Lỗi:** ' + errMsg);
+    await botReplyStreaming('⚠️ **Lỗi:** ' + (err.message || 'Không xác định'));
   }
 }
 
@@ -536,225 +616,272 @@ async function sendMessage(){
   const text = input.value.trim();
   const hasImage = !!pendingImage;
   if((!text && !hasImage) || isTyping) return;
-
   markInteracted();
-
   const imageData = pendingImage ? pendingImage.dataUrl : null;
-  input.value = '';
-  input.style.height = 'auto';
+  input.value = ''; input.style.height = 'auto';
   pendingImage = null;
   document.getElementById('imagePreview').classList.remove('show');
-  isTyping = true;
-  btnSend.disabled = true;
-
-  try{
-    await handleUserMessage(text || '[ảnh]', imageData);
-  }catch(err){
-    console.error(err);
-  }finally{
-    isTyping = false;
-    btnSend.disabled = !input.value.trim() && !pendingImage;
-  }
+  isTyping = true; btnSend.disabled = true;
+  try{ await handleUserMessage(text || '[ảnh]', imageData); }
+  finally{ isTyping = false; btnSend.disabled = !input.value.trim() && !pendingImage; }
 }
 btnSend.onclick = sendMessage;
-
-input.addEventListener('input', function(){
+input.addEventListener('input', () => {
   input.style.height = 'auto';
   input.style.height = Math.min(input.scrollHeight, 100) + 'px';
   btnSend.disabled = (!input.value.trim() && !pendingImage) || isTyping;
 });
-input.addEventListener('keydown', function(e){
-  if(e.key === 'Enter' && !e.shiftKey){
-    e.preventDefault();
-    sendMessage();
-  }
+input.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
+});
+document.querySelectorAll('.suggestion').forEach(s => {
+  s.onclick = () => { input.value = s.dataset.p; input.dispatchEvent(new Event('input')); sendMessage(); };
 });
 
-document.querySelectorAll('.suggestion').forEach(function(s){
-  s.onclick = function(){
-    input.value = s.dataset.p;
-    input.dispatchEvent(new Event('input'));
-    sendMessage();
+/* ===== TABS ===== */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const tab = btn.dataset.tab;
+    document.getElementById('panel-' + tab).classList.add('active');
+    bottomArea.style.display = tab === 'chat' ? 'block' : 'none';
   };
 });
 
+/* ===== MIC ===== */
 const btnMic = document.getElementById('btnMic');
 const recording = document.getElementById('recording');
-let recognition = null;
-let recognizing = false;
+let recognition = null, recognizing = false;
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 if(SpeechRecognition){
   recognition = new SpeechRecognition();
-  recognition.lang = 'vi-VN';
-  recognition.continuous = false;
-  recognition.interimResults = false;
-  recognition.onresult = function(e){
+  recognition.lang = 'vi-VN'; recognition.continuous = false; recognition.interimResults = false;
+  recognition.onresult = (e) => {
     const text = e.results[0][0].transcript.trim();
-    if(text){
-      input.value = text;
-      input.dispatchEvent(new Event('input'));
-      sendMessage();
-    }
+    if(text){ input.value = text; input.dispatchEvent(new Event('input')); sendMessage(); }
   };
-  recognition.onerror = function(e){
-    if(e.error === 'not-allowed') showToast('❌ Chưa cho quyền micro', 'error');
+  recognition.onerror = (e) => {
+    if(e.error === 'not-allowed') showToast('❌ Chưa cho quyền micro','error');
     else if(e.error === 'no-speech') showToast('🎤 Không nghe thấy gì');
-    else showToast('❌ Lỗi: ' + e.error, 'error');
+    else showToast('❌ Lỗi: ' + e.error,'error');
     stopRec();
   };
-  recognition.onend = function(){ stopRec(); };
+  recognition.onend = () => stopRec();
 }
-function stopRec(){
-  recognizing = false;
-  recording.classList.remove('show');
-  btnMic.classList.remove('rec');
-}
+function stopRec(){ recognizing = false; recording.classList.remove('show'); btnMic.classList.remove('rec'); }
 function startRec(){
-  if(!recognition){ showToast('❌ Trình duyệt không hỗ trợ micro', 'error'); return; }
-  try{
-    recognizing = true;
-    recording.classList.add('show');
-    btnMic.classList.add('rec');
-    recognition.start();
-  }catch(e){ showToast('❌ Không khởi động được micro', 'error'); stopRec(); }
+  if(!recognition){ showToast('❌ Trình duyệt không hỗ trợ micro','error'); return; }
+  try{ recognizing = true; recording.classList.add('show'); btnMic.classList.add('rec'); recognition.start(); }
+  catch(e){ showToast('❌ Không khởi động được micro','error'); stopRec(); }
 }
-btnMic.onclick = function(e){
-  e.stopPropagation();
-  if(recognizing) recognition.stop();
-  else startRec();
-};
+btnMic.onclick = (e) => { e.stopPropagation(); if(recognizing) recognition.stop(); else startRec(); };
 
+/* ===== IMAGE ===== */
 const fileInput = document.getElementById('fileInput');
 const imagePreview = document.getElementById('imagePreview');
 const previewImg = document.getElementById('previewImg');
 const previewInfo = document.getElementById('previewInfo');
-
-document.getElementById('btnImage').onclick = function(e){
-  e.stopPropagation();
-  fileInput.click();
-};
-fileInput.onchange = function(e){
+document.getElementById('btnImage').onclick = (e) => { e.stopPropagation(); fileInput.click(); };
+fileInput.onchange = (e) => {
   const file = e.target.files[0];
   if(!file) return;
-  if(!file.type.startsWith('image/')){ showToast('❌ Chỉ nhận file ảnh', 'error'); return; }
-  if(file.size > 5 * 1024 * 1024){ showToast('❌ Ảnh quá lớn (max 5MB)', 'error'); return; }
+  if(!file.type.startsWith('image/')){ showToast('❌ Chỉ nhận file ảnh','error'); return; }
+  if(file.size > 5*1024*1024){ showToast('❌ Ảnh quá lớn (max 5MB)','error'); return; }
   const reader = new FileReader();
-  reader.onload = function(ev){
-    pendingImage = { dataUrl: ev.target.result, name: file.name };
+  reader.onload = (ev) => {
+    pendingImage = { dataUrl:ev.target.result, name:file.name };
     previewImg.src = ev.target.result;
     previewInfo.textContent = file.name + ' • ' + (file.size/1024).toFixed(0) + ' KB';
     imagePreview.classList.add('show');
     input.dispatchEvent(new Event('input'));
   };
-  reader.readAsDataURL(file);
-  fileInput.value = '';
+  reader.readAsDataURL(file); fileInput.value = '';
 };
-document.getElementById('previewClose').onclick = function(){
-  pendingImage = null;
-  imagePreview.classList.remove('show');
-  input.dispatchEvent(new Event('input'));
+document.getElementById('previewClose').onclick = () => {
+  pendingImage = null; imagePreview.classList.remove('show'); input.dispatchEvent(new Event('input'));
 };
-
 const imgViewer = document.getElementById('imgViewer');
-document.getElementById('imgViewerClose').onclick = function(){ imgViewer.classList.remove('show'); };
-imgViewer.onclick = function(e){ if(e.target === imgViewer) imgViewer.classList.remove('show'); };
+document.getElementById('imgViewerClose').onclick = () => imgViewer.classList.remove('show');
+imgViewer.onclick = (e) => { if(e.target === imgViewer) imgViewer.classList.remove('show'); };
 
+/* ===== API KEY MODAL ===== */
 function openKeyModal(){
   keyInput.value = GROQ_KEY || '';
   keyModal.classList.add('show');
   btnKeySave.disabled = !keyInput.value.trim();
-  setTimeout(function(){ keyInput.focus(); }, 100);
+  setTimeout(()=>keyInput.focus(), 100);
 }
-function closeKeyModal(){
-  keyModal.classList.remove('show');
-}
-keyInput.addEventListener('input', function(){
-  btnKeySave.disabled = keyInput.value.trim().length < 10;
-});
-btnKeySave.onclick = function(){
+function closeKeyModal(){ keyModal.classList.remove('show'); }
+keyInput.addEventListener('input', () => { btnKeySave.disabled = keyInput.value.trim().length < 10; });
+btnKeySave.onclick = () => {
   const k = keyInput.value.trim();
-  if(!k.startsWith('gsk_')){
-    showToast('⚠️ Key Groq phải bắt đầu bằng "gsk_"', 'error');
-    return;
-  }
-  GROQ_KEY = k;
-  localStorage.setItem('samm_groq_key', k);
-  closeKeyModal();
-  showToast('✅ Đã lưu key', 'success');
-  testKey();
+  if(!k.startsWith('gsk_')){ showToast('⚠️ Key Groq phải bắt đầu bằng "gsk_"','error'); return; }
+  GROQ_KEY = k; localStorage.setItem('samm_groq_key', k);
+  closeKeyModal(); showToast('✅ Đã lưu key','success'); testKey();
 };
 document.getElementById('btnKeyCancel').onclick = closeKeyModal;
-document.getElementById('btnKey').onclick = function(e){
-  e.stopPropagation();
-  openKeyModal();
-};
+document.getElementById('btnKey').onclick = (e) => { e.stopPropagation(); openKeyModal(); };
+keyModal.onclick = (e) => { if(e.target === keyModal) closeKeyModal(); };
 
 async function testKey(){
-  if(!GROQ_KEY){
-    setStatus('Chưa có API key', false);
-    return false;
-  }
+  if(!GROQ_KEY){ setStatus('Chưa có API key', false); return false; }
   setStatus('Đang kiểm tra key...', true);
   try{
     const res = await fetch(GROQ_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + GROQ_KEY
-      },
-      body: JSON.stringify({
-        model: GROQ_MODEL,
-        messages: [{ role: 'user', content: 'hi' }],
-        max_tokens: 5
-      })
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + GROQ_KEY },
+      body: JSON.stringify({ model:GROQ_MODEL, messages:[{role:'user',content:'hi'}], max_tokens:5 })
     });
-    if(res.ok){
-      setStatus('Sẵn sàng • Groq AI', true);
-      return true;
-    } else {
-      setStatus('Key lỗi (mã ' + res.status + ')', false);
-      return false;
-    }
-  }catch(e){
-    setStatus('Không kết nối được Groq', false);
-    return false;
-  }
+    if(res.ok){ setStatus('Sẵn sàng • Groq AI', true); return true; }
+    setStatus('Key lỗi (' + res.status + ')', false); return false;
+  }catch(e){ setStatus('Không kết nối được Groq', false); return false; }
 }
 
-document.getElementById('btnClear').onclick = function(e){
+document.getElementById('btnClear').onclick = (e) => {
   e.stopPropagation();
   if(confirm('Xóa cuộc trò chuyện?')){
-    chat.innerHTML = '';
-    messages = [];
-    pendingImage = null;
-    imagePreview.classList.remove('show');
-    greeting();
+    chat.innerHTML = ''; messages = []; pendingImage = null;
+    imagePreview.classList.remove('show'); greeting();
   }
 };
 
+/* ============================================================
+   LOOKUP: FREE FIRE + TIKTOK
+   ============================================================
+   Các hàm này gọi PROXY_URL (bạn cấu hình ở trên).
+   Nếu PROXY_URL chưa điền, sẽ báo lỗi hướng dẫn.
+   ============================================================ */
+function renderSkeleton(container){
+  container.innerHTML = `
+    <div class="profile-card">
+      <div class="profile-avatar skeleton"></div>
+      <div class="profile-info">
+        <div class="skeleton" style="height:16px;width:60%;border-radius:6px;margin-bottom:8px"></div>
+        <div class="skeleton" style="height:12px;width:40%;border-radius:6px;margin-bottom:8px"></div>
+        <div class="skeleton" style="height:20px;width:50%;border-radius:6px"></div>
+      </div>
+    </div>`;
+  container.classList.add('show');
+}
+function renderError(container, msg){
+  container.innerHTML = `<div class="error-box">⚠️ ${escapeHtml(msg)}</div>`;
+  container.classList.add('show');
+}
+function renderProfile(container, data){
+  const avatar = data.avatar || data.avatarUrl || '';
+  const name = data.nickname || data.name || data.username || 'Không rõ';
+  const level = data.level != null ? `Lv.${data.level}` : '';
+  const region = data.region ? `🌍 ${data.region}` : '';
+  const uid = data.uid || data.id || '';
+  const isBanned = data.is_banned === 1 || data.isBanned === true || data.banned === true;
+  const banPeriod = data.ban_period || data.banPeriod || '';
+  let statusHtml = '';
+  if(data.is_banned != null || data.isBanned != null || data.banned != null){
+    statusHtml = isBanned
+      ? `<div class="status-badge banned">🚫 Đã bị khóa${banPeriod ? ' • ' + banPeriod : ''}</div>`
+      : `<div class="status-badge active">✅ Tài khoản bình thường</div>`;
+  } else if(data.is_banned == null && data.ban_status == null){
+    statusHtml = `<div class="status-badge loading">ℹ️ Không có dữ liệu ban</div>`;
+  }
+  container.innerHTML = `
+    <div class="profile-card">
+      ${avatar ? `<img class="profile-avatar" src="${escapeHtml(avatar)}" onerror="this.style.display='none'">` : `<div class="profile-avatar skeleton"></div>`}
+      <div class="profile-info">
+        <h4>${escapeHtml(name)}</h4>
+        <div class="profile-meta">
+          ${level ? `<span>${escapeHtml(level)}</span>` : ''}
+          ${region ? `<span>${escapeHtml(region)}</span>` : ''}
+          ${uid ? `<span>UID: ${escapeHtml(String(uid))}</span>` : ''}
+        </div>
+        ${statusHtml}
+      </div>
+    </div>`;
+  container.classList.add('show');
+}
+
+/* ===== FREE FIRE LOOKUP ===== */
+document.getElementById('btnFFLookup').onclick = async () => {
+  const uid = document.getElementById('ffUid').value.trim();
+  const region = document.getElementById('ffRegion').value;
+  const result = document.getElementById('ffResult');
+  const btn = document.getElementById('btnFFLookup');
+
+  if(!uid){ showToast('⚠️ Nhập UID Free Fire','error'); return; }
+  if(!/^\d{5,15}$/.test(uid)){ showToast('⚠️ UID phải là số (5-15 chữ số)','error'); return; }
+  if(!PROXY_URL){
+    renderError(result, 'Chưa cấu hình PROXY_URL. Xem hướng dẫn bên dưới để tạo proxy.');
+    showToast('⚠️ Chưa có proxy','error'); return;
+  }
+
+  btn.disabled = true;
+  renderSkeleton(result);
+  try{
+    const res = await fetch(`${PROXY_URL}/ff?uid=${encodeURIComponent(uid)}&region=${encodeURIComponent(region)}`);
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || data.message || ('Lỗi ' + res.status));
+    renderProfile(result, data);
+    showToast('✅ Tra cứu thành công','success');
+  }catch(err){
+    renderError(result, err.message || 'Không tra cứu được');
+    showToast('❌ ' + (err.message || 'Lỗi'),'error');
+  }finally{
+    btn.disabled = false;
+  }
+};
+
+/* ===== TIKTOK LOOKUP ===== */
+document.getElementById('btnTikTokLookup').onclick = async () => {
+  const id = document.getElementById('tiktokId').value.trim().replace(/^@/, '');
+  const result = document.getElementById('tiktokResult');
+  const btn = document.getElementById('btnTikTokLookup');
+
+  if(!id){ showToast('⚠️ Nhập TikTok ID','error'); return; }
+  if(!PROXY_URL){
+    renderError(result, 'Chưa cấu hình PROXY_URL. Xem hướng dẫn bên dưới để tạo proxy.');
+    showToast('⚠️ Chưa có proxy','error'); return;
+  }
+
+  btn.disabled = true;
+  renderSkeleton(result);
+  try{
+    const res = await fetch(`${PROXY_URL}/tiktok?id=${encodeURIComponent(id)}`);
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || data.message || ('Lỗi ' + res.status));
+    renderProfile(result, {
+      nickname: data.nickname || data.uniqueId || id,
+      username: data.uniqueId,
+      avatar: data.avatarLarger || data.avatarMedium || data.avatarThumb,
+      uid: data.uniqueId,
+      region: data.region,
+      level: data.level
+    });
+    showToast('✅ Tra cứu thành công','success');
+  }catch(err){
+    renderError(result, err.message || 'Không tra cứu được');
+    showToast('❌ ' + (err.message || 'Lỗi'),'error');
+  }finally{
+    btn.disabled = false;
+  }
+};
+
+/* ===== GREETING ===== */
 async function greeting(){
   const msg = 'Chào bạn 👋 Mình là **SAMM AI BOT** — chạy trên **Groq AI** (Llama 3.3 70B).\n\n' +
     'Giờ mình trả lời được **mọi thứ** như ChatGPT:\n' +
-    '• 📚 Kiến thức mọi lĩnh vực\n' +
-    '• 💻 Viết code (Python, JS, C++...)\n' +
-    '• ✍️ Viết văn, thơ, kể chuyện\n' +
-    '• 🌐 Dịch thuật đa ngôn ngữ\n' +
-    '• 🧮 Toán từ cơ bản đến nâng cao\n' +
-    '• 🎨 Chỉnh sửa ảnh bạn gửi\n\n' +
+    '• 📚 Kiến thức mọi lĩnh vực\n• 💻 Viết code (Python, JS, C++...)\n• ✍️ Viết văn, thơ, kể chuyện\n' +
+    '• 🌐 Dịch thuật đa ngôn ngữ\n• 🧮 Toán từ cơ bản đến nâng cao\n• 🎨 Chỉnh sửa ảnh bạn gửi\n\n' +
+    'Và mình còn có tab **🔍 Tra cứu** để check Free Fire & TikTok nữa đó!\n\n' +
     '**Hỏi mình bất cứ gì nhé!** 🚀';
-  messages.push({ role:'assistant', content: msg });
+  messages.push({ role:'assistant', content:msg });
   await botReplyStreaming(msg);
 }
 
 (function init(){
   greeting();
-
-  if(!GROQ_KEY){
-    setStatus('Cần nhập API key', false);
-    setTimeout(function(){ openKeyModal(); }, 1500);
-  } else {
-    testKey();
-  }
+  if(!GROQ_KEY){ setStatus('Cần nhập API key', false); setTimeout(openKeyModal, 1500); }
+  else testKey();
 })();
 </script>
 </body>
