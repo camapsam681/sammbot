@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SAMM AI BOT v7</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0a0e14;color:#fff;display:flex;flex-direction:column}
+
+/* ===== SETUP SCREEN (nhập key) ===== */
+#setupScreen{position:fixed;inset:0;background:linear-gradient(135deg,#0a0e14,#1a0e2e);z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:30px;text-align:center}
+#setupScreen.hide{display:none}
+#setupScreen .icon{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#ec4899,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:40px}
+#setupScreen h1{font-size:22px;font-weight:900;background:linear-gradient(135deg,#ec4899,#7c3aed);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+#setupScreen p{color:#9ca3af;font-size:13px;line-height:1.6;max-width:320px}
+#setupScreen input{width:100%;max-width:340px;background:#0a0e14;border:1px solid #2c2c2e;color:#fff;padding:14px 16px;border-radius:12px;font-size:14px;font-family:Menlo,monospace;outline:none;text-align:center}
+#setupScreen input:focus{border-color:#7c3aed}
+#setupScreen button{background:linear-gradient(135deg,#ec4899,#7c3aed);border:none;color:#fff;padding:14px 40px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;width:100%;max-width:340px}
+#setupScreen button:disabled{opacity:.4}
+#setupScreen .link{color:#60a5fa;text-decoration:none;font-size:12px}
+
+/* ===== START OVERLAY (unlock audio) ===== */
+#startOverlay{position:fixed;inset:0;background:linear-gradient(135deg,#0a0e14,#1a0e2e);z-index:9999;display:none;flex-direction:column;align-items:center;justify-content:center;gap:24px;cursor:pointer;text-align:center;padding:30px}
+#startOverlay.hide{display:none}
+#startOverlay.show{display:flex}
+#startOverlay .icon{width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,#ec4899,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:50px;animation:pulse 1.5s infinite;box-shadow:0 0 40px rgba(236,72,153,.6)}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+#startOverlay h1{font-size:24px;font-weight:900;background:linear-gradient(135deg,#ec4899,#7c3aed);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+#startOverlay p{color:#9ca3af;font-size:14px;line-height:1.6;max-width:300px}
+#startOverlay .tap{background:linear-gradient(135deg,#ec4899,#7c3aed);padding:14px 40px;border-radius:30px;font-size:16px;font-weight:800;animation:glow 1.5s infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(236,72,153,.5)}50%{box-shadow:0 0 40px rgba(236,72,153,.9)}}
+
+header{background:linear-gradient(135deg,#7c3aed,#2563eb);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(124,58,237,.4);z-index:10;flex-shrink:0}
+header .left{display:flex;align-items:center;gap:10px;min-width:0}
+header .logo{width:30px;height:30px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+header h1{font-size:14px;font-weight:800}
+header .status{font-size:10px;color:#c4b5fd;display:flex;align-items:center;gap:4px;margin-top:2px}
+header .dot{width:6px;height:6px;background:#30d158;border-radius:50%;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+header .icons{display:flex;gap:10px;font-size:17px;align-items:center}
+header .icons span{cursor:pointer;padding:4px 6px;border-radius:6px}
+
+.chat{flex:1;overflow-y:auto;padding:14px 12px 16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+.msg{display:flex;gap:8px;max-width:100%;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{flex-direction:row-reverse}
+.avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.msg.bot .avatar{background:linear-gradient(135deg,#ec4899,#7c3aed)}
+.msg.user .avatar{background:linear-gradient(135deg,#ff6b00,#ff2d55)}
+.bubble{background:#1c1c1e;border-radius:16px;padding:10px 14px;font-size:14px;line-height:1.55;max-width:calc(100% - 50px);word-wrap:break-word;white-space:pre-wrap}
+.msg.user .bubble{background:linear-gradient(135deg,#2563eb,#7c3aed);border-bottom-right-radius:4px}
+.msg.bot .bubble{background:#1c1c1e;border-bottom-left-radius:4px;border:1px solid #2c2c2e}
+.bubble code{background:#0a0e14;padding:2px 6px;border-radius:4px;color:#30d158;font-family:Menlo,monospace;font-size:12px}
+.bubble b{color:#f472b6}
+.bubble img.chat-img{max-width:100%;border-radius:10px;margin-top:8px;display:block;border:1px solid #2c2c2e;cursor:pointer;background:#0a0e14;min-height:80px}
+
+.typing{display:inline-block}
+.typing::after{content:'▋';color:#f472b6;animation:blink .8s infinite;margin-left:1px}
+.typing-dots span{display:inline-block;width:6px;height:6px;background:#6b7280;border-radius:50%;margin:0 2px;animation:bounce 1.4s infinite}
+.typing-dots span:nth-child(2){animation-delay:.2s}
+.typing-dots span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
+
+.recording{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#ec4899,#7c3aed);padding:8px 18px;border-radius:20px;font-size:12px;font-weight:700;z-index:100;display:none;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(236,72,153,.5)}
+.recording.show{display:flex}
+.recording .pulse{width:10px;height:10px;background:#fff;border-radius:50%;animation:pulse-rec 1s infinite}
+@keyframes pulse-rec{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.3)}}
+
+.bottom-area{background:#141a24;border-top:1px solid #1f2937;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom)}
+.scroll-row{display:flex;gap:8px;overflow-x:auto;padding:8px 12px;scrollbar-width:none}
+.scroll-row::-webkit-scrollbar{display:none}
+.suggestion{background:#1c1c1e;border:1px solid #2c2c2e;color:#9ca3af;padding:6px 12px;border-radius:16px;font-size:11px;white-space:nowrap;cursor:pointer;flex-shrink:0}
+.suggestion:active{background:#2c2c2e}
+
+.input-bar{padding:8px 12px 10px;display:flex;gap:6px;align-items:flex-end}
+.input-bar textarea{flex:1;background:#0a0e14;border:1px solid #2c2c2e;border-radius:20px;color:#fff;font-size:14px;font-family:inherit;padding:10px 14px;resize:none;outline:none;max-height:100px;line-height:1.4;min-height:40px}
+.input-bar textarea::placeholder{color:#6b7280}
+.btn-icon{width:40px;height:40px;border-radius:50%;border:none;background:#1c1c1e;color:#9ca3af;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.btn-icon:active{background:#2c2c2e}
+.btn-send{background:linear-gradient(135deg,#ec4899,#7c3aed);color:#fff}
+.btn-send:disabled{opacity:.4}
+.btn-mic.rec{background:linear-gradient(135deg,#ef4444,#ec4899);color:#fff;animation:pulse 1s infinite}
+
+.image-preview{position:fixed;bottom:110px;left:12px;right:12px;background:#1c1c1e;border:1px solid #2c2c2e;border-radius:12px;padding:10px;display:none;z-index:50;align-items:center;gap:10px}
+.image-preview.show{display:flex}
+.image-preview img{width:60px;height:60px;object-fit:cover;border-radius:8px}
+.image-preview .info{flex:1;font-size:11px;color:#9ca3af;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.image-preview .close{width:28px;height:28px;border-radius:50%;background:#2c2c2e;color:#fff;border:none;cursor:pointer;font-size:16px}
+
+.img-viewer{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:600;display:none;align-items:center;justify-content:center;padding:20px}
+.img-viewer.show{display:flex}
+.img-viewer img{max-width:100%;max-height:90vh;border-radius:12px}
+.img-viewer .close{position:absolute;top:20px;right:20px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;border:none;font-size:22px;cursor:pointer}
+
+.toast{position:fixed;bottom:180px;left:50%;transform:translateX(-50%);background:#2c2c2e;color:#fff;padding:10px 20px;border-radius:10px;font-size:12px;z-index:999;display:none;box-shadow:0 4px 20px rgba(0,0,0,.8);max-width:85%;text-align:center}
+.toast.show{display:block}
+.toast.success{background:linear-gradient(135deg,#30d158,#0a84ff)}
+::-webkit-scrollbar{width:0}
+</style>
+</head>
+<body>
+
+<!-- SETUP: NHẬP API KEY -->
+<div id="setupScreen">
+  <div class="icon">🔑</div>
+  <h1>Nhập API Key Groq</h1>
+  <p>Dán API key Groq của bạn vào đây. Key chỉ lưu trên máy bạn, không gửi đi đâu.</p>
+  <input type="password" id="keyInput" placeholder="gsk_..." autocomplete="off">
+  <button id="btnSaveKey" disabled>LƯU VÀ BẮT ĐẦU</button>
+  <a class="link" href="https://console.groq.com/keys" target="_blank">Chưa có key? Lấy tại đây →</a>
+  <p style="font-size:11px;opacity:.5">Key được lưu vào localStorage của trình duyệt</p>
+</div>
+
+<!-- START OVERLAY -->
+<div id="startOverlay">
+  <div class="icon">⚡</div>
+  <h1>SAMM AI BOT</h1>
+  <p>Nhấn nút bên dưới để bật <b style="color:#f472b6">nhạc nền</b> và <b style="color:#f472b6">giọng nói</b></p>
+  <div class="tap">👆 CHẠM ĐỂ BẮT ĐẦU</div>
+  <p style="font-size:11px;opacity:.6">(iOS yêu cầu chạm 1 lần để cho phép âm thanh)</p>
+</div>
+
+<header>
+  <div class="left">
+    <div class="logo">⚡</div>
+    <div>
+      <h1>SAMM AI BOT v7</h1>
+      <div class="status"><span class="dot"></span>Groq AI • Trả lời mọi thứ</div>
+    </div>
+  </div>
+  <div class="icons">
+    <span id="btnClear" title="Xóa chat">🗑️</span>
+    <span id="btnLogout" title="Đổi key">🔑</span>
+  </div>
+</header>
+
+<div class="chat" id="chat"></div>
+
+<div class="recording" id="recording">
+  <span class="pulse"></span>
+  <span>🎤 Đang nghe...</span>
+</div>
+
+<div class="image-preview" id="imagePreview">
+  <img id="previewImg" src="" alt="">
+  <div class="info" id="previewInfo">Ảnh đã chọn</div>
+  <button class="close" id="previewClose">✕</button>
+</div>
+
+<div class="bottom-area">
+  <div class="scroll-row" id="suggestions">
+    <div class="suggestion" data-p="Chào bạn, bạn là ai?">👋 Chào hỏi</div>
+    <div class="suggestion" data-p="Giải thích định lý Pytago dễ hiểu">📐 Toán học</div>
+    <div class="suggestion" data-p="Viết cho tôi một bài thơ về mùa thu">✍️ Làm thơ</div>
+    <div class="suggestion" data-p="Viết hàm Python tính giai thừa">💻 Code Python</div>
+    <div class="suggestion" data-p="Cách học tiếng Anh hiệu quả">🇬🇧 Tiếng Anh</div>
+    <div class="suggestion" data-p="Kể chuyện cười">😂 Chuyện cười</div>
+    <div class="suggestion" data-p="Phân tích nhân vật Chí Phèo">📚 Văn học</div>
+    <div class="suggestion" data-p="Giải thích AI là gì">🤖 Kiến thức</div>
+  </div>
+
+  <div class="input-bar">
+    <button class="btn-icon" id="btnImage" title="Gửi ảnh">📎</button>
+    <button class="btn-icon btn-mic" id="btnMic" title="Nhập giọng nói">🎤</button>
+    <textarea id="input" rows="1" placeholder="Hỏi mình bất cứ điều gì..."></textarea>
+    <button class="btn-icon btn-send" id="btnSend" disabled>➤</button>
+  </div>
+</div>
+
+<input type="file" id="fileInput" accept="image/*" style="display:none">
+
+<div class="img-viewer" id="imgViewer">
+  <button class="close" id="imgViewerClose">✕</button>
+  <img id="imgViewerImg" src="" alt="">
+</div>
+
+<div class="toast" id="toast"></div>
+
+<audio id="bgMusic" loop preload="auto">
+  <source src="https://files.catbox.moe/g65v1o.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+/* ============================================================
+   SAMM AI BOT v7 — Groq AI
+   ============================================================ */
+
+/* ===== CẤU HÌNH GROQ ===== */
+const GROQ_MODEL = 'llama-3.3-70b-versatile';
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+let GROQ_KEY = localStorage.getItem('samm_groq_key') || '';
+
+/* ===== DOM ===== */
+const chat = document.getElementById('chat');
+const input = document.getElementById('input');
+const btnSend = document.getElementById('btnSend');
+const music = document.getElementById('bgMusic');
+const startOverlay = document.getElementById('startOverlay');
+const setupScreen = document.getElementById('setupScreen');
+const keyInput = document.getElementById('keyInput');
+const btnSaveKey = document.getElementById('btnSaveKey');
+
+/* ===== STATE ===== */
+let messages = [];       // lịch sử chat cho AI
+let isTyping = false;
+let pendingImage = null;
+let botReady = false;
+let femaleVoice = null;
+
+/* ===== GIỌNG NÓI ===== */
+function refreshVoices(){
+  try{
+    const voices = speechSynthesis.getVoices() || [];
+    if(!voices.length) return;
+    femaleVoice =
+      voices.find(v => /vi/i.test(v.lang) && /female|nữ|nu|linh|mai|chi|my|hoai|thao|vy/i.test(v.name)) ||
+      voices.find(v => /vi/i.test(v.lang)) ||
+      voices.find(v => /en/i.test(v.lang) && /female|samantha|zira|karen|victoria|aria/i.test(v.name)) ||
+      voices.find(v => /en-US/i.test(v.lang)) ||
+      voices[0] || null;
+  }catch(e){}
+}
+if('speechSynthesis' in window){
+  refreshVoices();
+  speechSynthesis.onvoiceschanged = refreshVoices;
+  setTimeout(refreshVoices, 300);
+  setTimeout(refreshVoices, 1000);
+}
+
+function speak(text){
+  if(!botReady) return;
+  if(!('speechSynthesis' in window)) return;
+  if(!text) return;
+  let t = String(text).replace(/[*`#_~>\[\]()]/g, '').replace(/\n+/g, '. ').replace(/```[\s\S]*?```/g, ' code ').trim();
+  if(!t) return;
+  if(t.length > 350) t = t.slice(0, 350) + '...';
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(t);
+    if(femaleVoice){ u.voice = femaleVoice; u.lang = femaleVoice.lang; }
+    else u.lang = 'vi-VN';
+    u.pitch = 1.5;
+    u.rate = 1.0;
+    u.volume = 1;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* ===== NHẠC ===== */
+function playMusic(){
+  music.volume = 0.25;
+  const p = music.play();
+  if(p && p.catch) p.catch(()=>{});
+}
+
+/* ===== SETUP SCREEN ===== */
+keyInput.addEventListener('input', () => {
+  btnSaveKey.disabled = keyInput.value.trim().length < 10;
+});
+btnSaveKey.onclick = () => {
+  const k = keyInput.value.trim();
+  if(!k.startsWith('gsk_')){
+    showToast('⚠️ Key Groq phải bắt đầu bằng "gsk_"');
+    return;
+  }
+  localStorage.setItem('samm_groq_key', k);
+  GROQ_KEY = k;
+  setupScreen.classList.add('hide');
+  startOverlay.classList.add('show');
+};
+
+/* ===== START OVERLAY ===== */
+function startBot(){
+  if(botReady) return;
+  botReady = true;
+  startOverlay.classList.remove('show');
+  startOverlay.classList.add('hide');
+  playMusic();
+  try{
+    const u = new SpeechSynthesisUtterance('Xin chào');
+    u.volume = 0.01;
+    if(femaleVoice) u.voice = femaleVoice;
+    speechSynthesis.speak(u);
+  }catch(e){}
+  setTimeout(() => greeting(), 400);
+  setInterval(() => { if(botReady && music.paused) playMusic(); }, 3000);
+}
+startOverlay.onclick = startBot;
+startOverlay.addEventListener('touchstart', (e) => { e.preventDefault(); startBot(); }, { passive: false });
+
+/* ===== HELPERS ===== */
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function showToast(msg, ok){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (ok ? ' success' : '');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.className = 'toast', 2400);
+}
+function scrollBottom(){
+  requestAnimationFrame(() => { chat.scrollTop = chat.scrollHeight; });
+}
+function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+
+/* ===== RENDER MESSAGE ===== */
+function renderMessage(msg){
+  const wrap = document.createElement('div');
+  wrap.className = 'msg ' + msg.role;
+  const av = document.createElement('div');
+  av.className = 'avatar';
+  av.textContent = msg.role === 'user' ? '👤' : '⚡';
+  wrap.appendChild(av);
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  let html = escapeHtml(msg.content || '');
+  // Markdown đơn giản
+  html = html.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+  bubble.innerHTML = html;
+  if(msg.imageData){
+    const img = document.createElement('img');
+    img.className = 'chat-img';
+    img.src = msg.imageData;
+    img.onclick = () => {
+      document.getElementById('imgViewerImg').src = msg.imageData;
+      document.getElementById('imgViewer').classList.add('show');
+    };
+    bubble.appendChild(img);
+  }
+  wrap.appendChild(bubble);
+  chat.appendChild(wrap);
+  scrollBottom();
+  return bubble;
+}
+
+/* ===== TYPING INDICATOR ===== */
+function botTypingIndicator(){
+  const wrap = document.createElement('div');
+  wrap.className = 'msg bot';
+  wrap.id = 'typingIndicator';
+  wrap.innerHTML = '<div class="avatar">⚡</div><div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
+  chat.appendChild(wrap);
+  scrollBottom();
+}
+function removeTypingIndicator(){
+  const el = document.getElementById('typingIndicator');
+  if(el) el.remove();
+}
+
+/* ===== STREAMING REPLY (giống ChatGPT) ===== */
+function botReplyStreaming(text){
+  return new Promise(function(resolve){
+    const wrap = document.createElement('div');
+    wrap.className = 'msg bot';
+    const av = document.createElement('div');
+    av.className = 'avatar'; av.textContent = '⚡';
+    wrap.appendChild(av);
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    wrap.appendChild(bubble);
+    chat.appendChild(wrap);
+
+    const fullHTML = escapeHtml(text)
+      .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>');
+
+    let i = 0;
+    const step = 3;
+    function type(){
+      if(i >= fullHTML.length){
+        bubble.innerHTML = fullHTML;
+        scrollBottom();
+        speak(text);
+        resolve();
+        return;
+      }
+      let next = i + step;
+      const slice = fullHTML.slice(0, next);
+      const lastOpen = slice.lastIndexOf('<');
+      const lastClose = slice.lastIndexOf('>');
+      if(lastOpen > lastClose) next = lastOpen;
+      bubble.innerHTML = fullHTML.slice(0, next) + '<span class="typing"></span>';
+      i = next;
+      scrollBottom();
+      setTimeout(type, 15);
+    }
+    type();
+  });
+}
+
+/* ===== GỌI GROQ API ===== */
+async function callGroq(userText, imageData){
+  if(!GROQ_KEY){
+    throw new Error('Chưa có API key');
+  }
+
+  // Build messages cho AI
+  const sysPrompt = 'Bạn là SAMM AI BOT - trợ lý AI thông minh, thân thiện, trả lời bằng tiếng Việt. Bạn có thể trả lời mọi câu hỏi về toán, lý, hóa, văn, sử, địa, code, dịch thuật, sáng tạo, lời khuyên... Trả lời ngắn gọn, dễ hiểu, có thể dùng emoji. Nếu user gửi ảnh, hãy mô tả hoặc nhận xét ảnh đó.';
+
+  const apiMessages = [
+    { role: 'system', content: sysPrompt },
+    ...messages.slice(-10).map(m => {
+      if(m.role === 'user' && m.imageData){
+        // Groq Llama 3.3 70B không hỗ trợ vision → chỉ gửi text
+        return { role: 'user', content: '[Người dùng gửi một ảnh] ' + (m.content || '') };
+      }
+      return { role: m.role === 'user' ? 'user' : 'assistant', content: m.content || '' };
+    })
+  ];
+
+  // Nếu có ảnh → mô tả sơ qua (Groq không có vision cho model này)
+  if(imageData){
+    apiMessages.push({
+      role: 'user',
+      content: (userText || '') + '\n\n[Người dùng đã gửi 1 ảnh. Hãy trả lời như thể bạn đã xem ảnh và phản hồi thân thiện.]'
+    });
+  } else {
+    apiMessages.push({ role: 'user', content: userText });
+  }
+
+  const res = await fetch(GROQ_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + GROQ_KEY
+    },
+    body: JSON.stringify({
+      model: GROQ_MODEL,
+      messages: apiMessages,
+      temperature: 0.8,
+      max_tokens: 2048,
+      stream: false
+    })
+  });
+
+  if(!res.ok){
+    const err = await res.text();
+    if(res.status === 401) throw new Error('API key sai hoặc hết hạn');
+    if(res.status === 429) throw new Error('Quá nhiều request, đợi chút nhé');
+    throw new Error('Lỗi API: ' + res.status + ' — ' + err.slice(0, 200));
+  }
+
+  const data = await res.json();
+  const reply = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+  if(!reply) throw new Error('Không nhận được trả lời');
+  return reply.trim();
+}
+
+/* ===== XỬ LÝ ẢNH ===== */
+function imageToCanvas(dataUrl){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = img.width; c.height = img.height;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      resolve({ canvas: c, ctx, img });
+    };
+    img.onerror = reject;
+    img.src = dataUrl;
+  });
+}
+
+async function editImage(dataUrl, filter){
+  const { canvas, ctx, img } = await imageToCanvas(dataUrl);
+  const w = canvas.width, h = canvas.height;
+  switch(filter){
+    case 'gray': ctx.filter='grayscale(1)'; ctx.drawImage(img,0,0); break;
+    case 'blur': ctx.filter='blur(4px)'; ctx.drawImage(img,0,0); break;
+    case 'bright': ctx.filter='brightness(1.4) saturate(1.2)'; ctx.drawImage(img,0,0); break;
+    case 'dark': ctx.filter='brightness(0.6)'; ctx.drawImage(img,0,0); break;
+    case 'sepia': ctx.filter='sepia(1)'; ctx.drawImage(img,0,0); break;
+    case 'invert': ctx.filter='invert(1)'; ctx.drawImage(img,0,0); break;
+    case 'warm': ctx.filter='sepia(0.3) saturate(1.3) hue-rotate(-15deg)'; ctx.drawImage(img,0,0); break;
+    case 'cold': ctx.filter='saturate(1.1) hue-rotate(180deg)'; ctx.drawImage(img,0,0); break;
+    case 'cute':
+      ctx.filter='brightness(1.15) saturate(1.3)'; ctx.drawImage(img,0,0);
+      ctx.filter='none';
+      ctx.fillStyle='rgba(255,182,220,0.15)'; ctx.fillRect(0,0,w,h);
+      break;
+    case 'flip':
+      ctx.save(); ctx.scale(-1,1); ctx.drawImage(img,-w,0); ctx.restore(); break;
+    case 'rotate':
+      canvas.width=h; canvas.height=w;
+      ctx.translate(h/2,w/2); ctx.rotate(Math.PI/2);
+      ctx.drawImage(img,-w/2,-h/2);
+      break;
+    default: ctx.drawImage(img,0,0);
+  }
+  return canvas.toDataURL('image/png');
+}
+
+/* ===== XỬ LÝ TIN NHẮN ===== */
+async function handleUserMessage(text, imageData){
+  // Hiển thị tin user
+  const userMsg = { role:'user', content:text, imageData:imageData };
+  renderMessage(userMsg);
+  messages.push({ role:'user', content:text, imageData: !!imageData });
+
+  botTypingIndicator();
+
+  try{
+    // Check xem user muốn chỉnh sửa ảnh không
+    if(imageData){
+      const t = (text || '').toLowerCase();
+      const edits = [
+        { re:/đen trắng|xám|gray|b&w/, f:'gray', msg:'Đã chuyển ảnh sang **đen trắng**.' },
+        { re:/mờ|blur/, f:'blur', msg:'Đã làm **mờ** ảnh.' },
+        { re:/sáng|bright/, f:'bright', msg:'Đã làm **sáng** ảnh.' },
+        { re:/tối|dark/, f:'dark', msg:'Đã làm **tối** ảnh.' },
+        { re:/nâu|sepia|hoài cổ/, f:'sepia', msg:'Hiệu ứng **hoài cổ**.' },
+        { re:/âm bản|invert|đảo màu/, f:'invert', msg:'Đã tạo **âm bản**.' },
+        { re:/ấm|warm/, f:'warm', msg:'Tông **ấm**.' },
+        { re:/lạnh|cold/, f:'cold', msg:'Tông **lạnh**.' },
+        { re:/cute|dễ thương|xinh/, f:'cute', msg:'Đã làm ảnh **cute** hơn 💕' },
+        { re:/lật|flip|gương/, f:'flip', msg:'Đã **lật ngang** ảnh.' },
+        { re:/xoay|rotate|quay/, f:'rotate', msg:'Đã **xoay 90°**.' }
+      ];
+      for(const e of edits){
+        if(e.re.test(t)){
+          removeTypingIndicator();
+          const out = await editImage(imageData, e.f);
+          messages.push({ role:'assistant', content:'✅ ' + e.msg });
+          await botReplyWithStreaming('✅ ' + e.msg + '\n\n_[Ảnh đã chỉnh sửa]_');
+          // Hiển thị ảnh đã sửa
+          const lastBubble = chat.lastElementChild.querySelector('.bubble');
+          const img = document.createElement('img');
+          img.className = 'chat-img';
+          img.src = out;
+          img.onclick = () => {
+            document.getElementById('imgViewerImg').src = out;
+            document.getElementById('imgViewer').classList.add('show');
+          };
+          lastBubble.appendChild(img);
+          return;
+        }
+      }
+    }
+
+    // Gọi AI
+    const reply = await callGroq(text, imageData);
+
+    removeTypingIndicator();
+    messages.push({ role:'assistant', content:reply });
+    await botReplyStreaming(reply);
+
+  }catch(err){
+    removeTypingIndicator();
+    console.error('Groq error:', err);
+    let errMsg = err.message || 'Lỗi không xác định';
+    if(errMsg.includes('Failed to fetch') || errMsg.includes('NetworkError')){
+      errMsg = 'Không kết nối được Groq. Kiểm tra mạng nhé!';
+    }
+    await botReplyWithStreaming('⚠️ **Lỗi:** ' + errMsg + '\n\nThử lại hoặc kiểm tra API key.');
+  }
+}
+
+/* ===== SEND ===== */
+async function sendMessage(){
+  const text = input.value.trim();
+  const hasImage = !!pendingImage;
+  if((!text && !hasImage) || isTyping) return;
+
+  const imageData = pendingImage ? pendingImage.dataUrl : null;
+  input.value = '';
+  input.style.height = 'auto';
+  pendingImage = null;
+  document.getElementById('imagePreview').classList.remove('show');
+  isTyping = true;
+  btnSend.disabled = true;
+
+  try{
+    await handleUserMessage(text || '[ảnh]', imageData);
+  }catch(err){
+    console.error(err);
+  }finally{
+    isTyping = false;
+    btnSend.disabled = !input.value.trim() && !pendingImage;
+  }
+}
+btnSend.onclick = sendMessage;
+
+input.addEventListener('input', function(){
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 100) + 'px';
+  btnSend.disabled = (!input.value.trim() && !pendingImage) || isTyping;
+});
+input.addEventListener('keydown', function(e){
+  if(e.key === 'Enter' && !e.shiftKey){
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+document.querySelectorAll('.suggestion').forEach(function(s){
+  s.onclick = function(){
+    input.value = s.dataset.p;
+    input.dispatchEvent(new Event('input'));
+    sendMessage();
+  };
+});
+
+/* ===== STT ===== */
+const btnMic = document.getElementById('btnMic');
+const recording = document.getElementById('recording');
+let recognition = null;
+let recognizing = false;
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+if(SpeechRecognition){
+  recognition = new SpeechRecognition();
+  recognition.lang = 'vi-VN';
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.onresult = (e) => {
+    const text = e.results[0][0].transcript.trim();
+    if(text){
+      input.value = text;
+      input.dispatchEvent(new Event('input'));
+      sendMessage();
+    }
+  };
+  recognition.onerror = (e) => {
+    if(e.error === 'not-allowed') showToast('❌ Chưa cho quyền micro');
+    else if(e.error === 'no-speech') showToast('🎤 Không nghe thấy gì');
+    else showToast('❌ Lỗi: ' + e.error);
+    stopRec();
+  };
+  recognition.onend = () => stopRec();
+}
+function stopRec(){
+  recognizing = false;
+  recording.classList.remove('show');
+  btnMic.classList.remove('rec');
+}
+function startRec(){
+  if(!recognition){ showToast('❌ Trình duyệt không hỗ trợ micro.\nDùng Chrome Android nhé!'); return; }
+  try{
+    recognizing = true;
+    recording.classList.add('show');
+    btnMic.classList.add('rec');
+    recognition.start();
+  }catch(e){ showToast('❌ Không khởi động được micro'); stopRec(); }
+}
+btnMic.onclick = (e) => {
+  e.stopPropagation();
+  if(recognizing) recognition.stop();
+  else startRec();
+};
+
+/* ===== FILE ẢNH ===== */
+const fileInput = document.getElementById('fileInput');
+const imagePreview = document.getElementById('imagePreview');
+const previewImg = document.getElementById('previewImg');
+const previewInfo = document.getElementById('previewInfo');
+
+document.getElementById('btnImage').onclick = (e) => {
+  e.stopPropagation();
+  fileInput.click();
+};
+fileInput.onchange = (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')){ showToast('❌ Chỉ nhận file ảnh'); return; }
+  if(file.size > 5 * 1024 * 1024){ showToast('❌ Ảnh quá lớn (max 5MB)'); return; }
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    pendingImage = { dataUrl: ev.target.result, name: file.name };
+    previewImg.src = ev.target.result;
+    previewInfo.textContent = file.name + ' • ' + (file.size/1024).toFixed(0) + ' KB';
+    imagePreview.classList.add('show');
+    input.dispatchEvent(new Event('input'));
+  };
+  reader.readAsDataURL(file);
+  fileInput.value = '';
+};
+document.getElementById('previewClose').onclick = () => {
+  pendingImage = null;
+  imagePreview.classList.remove('show');
+  input.dispatchEvent(new Event('input'));
+};
+
+/* ===== IMG VIEWER ===== */
+const imgViewer = document.getElementById('imgViewer');
+document.getElementById('imgViewerClose').onclick = () => imgViewer.classList.remove('show');
+imgViewer.onclick = (e) => { if(e.target === imgViewer) imgViewer.classList.remove('show'); };
+
+/* ===== CLEAR ===== */
+document.getElementById('btnClear').onclick = function(e){
+  e.stopPropagation();
+  if(confirm('Xóa cuộc trò chuyện?')){
+    chat.innerHTML = '';
+    messages = [];
+    pendingImage = null;
+    imagePreview.classList.remove('show');
+    greeting();
+  }
+};
+
+/* ===== ĐỔI KEY ===== */
+document.getElementById('btnLogout').onclick = function(e){
+  e.stopPropagation();
+  if(confirm('Đổi API key Groq?')){
+    localStorage.removeItem('samm_groq_key');
+    GROQ_KEY = '';
+    location.reload();
+  }
+};
+
+/* ===== GREETING ===== */
+async function greeting(){
+  const msg = 'Chào bạn 👋 Mình là **SAMM AI BOT v7** — chạy trên **Groq AI** (Llama 3.3 70B).\n\n' +
+    'Giờ mình có thể trả lời **mọi thứ** như ChatGPT:\n' +
+    '• 📚 Kiến thức mọi lĩnh vực\n' +
+    '• 💻 Viết code (Python, JS, C++, ...)\n' +
+    '• ✍️ Viết văn, thơ, kể chuyện\n' +
+    '• 🌐 Dịch thuật đa ngôn ngữ\n' +
+    '• 🧮 Toán từ cơ bản đến nâng cao\n' +
+    '• 💡 Lời khuyên, tư vấn\n' +
+    '• 🎨 Chỉnh sửa ảnh bạn gửi\n\n' +
+    '**Hỏi mình bất cứ gì nhé!** 🚀';
+  messages.push({ role:'assistant', content: msg });
+  await botReplyWithStreaming(msg);
+}
+
+/* ===== KHỞI ĐỘNG ===== */
+if(GROQ_KEY){
+  // Đã có key → vào start overlay
+  setupScreen.classList.add('hide');
+  startOverlay.classList.add('show');
+} else {
+  // Chưa có key → hiện setup
+  setupScreen.classList.remove('hide');
+}
+</script>
+</body>
+</html>
